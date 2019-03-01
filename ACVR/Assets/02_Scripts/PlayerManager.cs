@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using OVRTouchSample;
 using System;
 
 public class PlayerManager : MonoBehaviour {
@@ -16,7 +15,6 @@ public class PlayerManager : MonoBehaviour {
         PopulateInventory();
     }
 
-
     void Update()
     {
 
@@ -30,7 +28,6 @@ public class PlayerManager : MonoBehaviour {
 
     }
 
-
     void PopulateInventory()
     {
         sculptures = GetComponent<MenuManager>().Sculptures;
@@ -40,19 +37,12 @@ public class PlayerManager : MonoBehaviour {
         }
     }
 
-
-
     Vector3 z;
     void RotateInventory(float inertiaApplied)
     {
         z.z = inertiaApplied;
         _Inventory.GetComponent<Rigidbody>().AddTorque(z);
     }
-
     
    // enum slot { One, Two, Three, Four, Five, Six};
-
-
-    
-
 }

@@ -4,29 +4,49 @@ using UnityEngine;
 
 public class Snapping : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    public Vector3 vecRotation;
+    public Vector3 halfExtents;
+
+    private bool isWallHanging;
+    private Quaternion quatRotation;
+
+    void Start()
+    {
+        isWallHanging = (gameObject.tag == "WallArt");
+    }
+
+    public void AttemptSnap()
+    {
+    /*
+        Call fron grabber controller
+
+        Raycast in direction of controller
+        If nearest wall/floor hit is the appropriate wall/floor
+        Align object with surface RaycastHit.point
+            Should be easy for statues just match up with up
+            Should also be easy for paintings just align normal and match up with up
+    */
+    }
+
+    /*
+    void Update () {
         //Use spherecast?
         RaycastHit hit;
         float rayRange = Mathf.Infinity;
         //Layermask floor art vs. wall art
 
-        /*if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, rayRange))
+        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, rayRange))
         {
 
-        }*/
+        }
 
         //Passed from RaycastGrabber
 
         //If Raycast grabber hits surface,
         //then is let go,
-        SurfaceSnap(hit.collider);
+        //SurfaceSnap(hit.collider); COMMENTED FOR TESTING
     }
+    */
 
     //Attaches an artwork to its appropriate surface when close
     public void SurfaceSnap(Collider col)

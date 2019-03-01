@@ -11,15 +11,11 @@ public class MenuManager : MonoBehaviour {
     //rotate gallery selection menu
 
 
-        //test framerate
+    //TODO: test framerate
     void Start()
     {
         OpenGalleryStand();
-
     }
-
-
-
 
     public void OpenGalleryStand()
     {
@@ -33,18 +29,14 @@ public class MenuManager : MonoBehaviour {
         }
     }
 
-
-
-
     IEnumerator RotateY(GameObject go, float angle)
     {
         for (int i = 0; i < angle; i++)
         {
-        go.transform.RotateAround(go.transform.position, Vector3.down, 1);
-        yield return null;
+            go.transform.RotateAround(go.transform.position, Vector3.down, 1);
+            yield return null;
         }
     }
-
 
     IEnumerator Spin(GameObject go)
     {

@@ -14,10 +14,7 @@ public class CueGalleryMenu : MonoBehaviour {
         currPos = transform.position.y;
         menuManager.GetComponent<MenuManager>().OpenGalleryStand();
         StartCoroutine(RaiseSelf(howHigh + currPos));
-
     }
-
-
 
     void OnColliderEnter()
     {
@@ -25,7 +22,6 @@ public class CueGalleryMenu : MonoBehaviour {
         StartCoroutine(RaiseSelf(howHigh));
     }
     
-
     IEnumerator RaiseSelf(float end)
     {
         for (int i = 0; i < 40 ; i++)
@@ -35,7 +31,5 @@ public class CueGalleryMenu : MonoBehaviour {
             transform.position += new Vector3(0, currPos, 0);
             yield return null;
         }
- 
     }
-
 }
