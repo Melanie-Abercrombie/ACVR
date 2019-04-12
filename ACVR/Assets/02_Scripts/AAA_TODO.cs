@@ -7,11 +7,7 @@ public class AAA_TODO {
     /*
     ---To-do list---
     
-    snapping to floor
-    snapping to wall
     collision detection on snapping
-
-    long distance hold
 
     ---MVP cuttoff---
     
@@ -19,6 +15,8 @@ public class AAA_TODO {
     inventory (pocket held items)
     make more artwork
     make pedastals and frames
+    
+    visual feedback (hands / ray)
 
     */
     //////////////////

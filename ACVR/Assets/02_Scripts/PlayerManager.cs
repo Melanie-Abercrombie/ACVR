@@ -4,45 +4,128 @@ using UnityEngine;
 using System;
 
 public class PlayerManager : MonoBehaviour {
+    
+    public OVRPlayerController OVRPlayer;
+    public OVRInput.Controller hand;
+    public GrabberControls grabber;
+    public InventoryManager inventory;
 
-    public GameObject _Inventory;  //reference object to be rotated
-    public GameObject _LHand;
-    Vector2 thumbstick;
+    private bool interactingWithInventory;
+    private float slowUpdateInterval = 0.25f;
 
-    List<GameObject> sculptures;
-   void Start()
+    void Start()
     {
-        PopulateInventory();
+        // consider creating the inventory and the grabber in here (probably not tho)
+        InvokeRepeating("SlowUpdate", 0, slowUpdateInterval);
     }
 
-    void Update()
+    void LateUpdate()
     {
+        GrabberCheck();
+    }
 
-       if(OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick) != Vector2.zero)
+    void SlowUpdate()
+    {
+        InventoryCheck();
+    }
+
+    void GrabberCheck()
+    {
+        if (!IsHolding() && TriggerIsPressed())
         {
-            _Inventory.GetComponent<MeshRenderer>().enabled = true;
-            thumbstick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
-            RotateInventory(thumbstick.y);
+            grabber.AttemptGrab();
         }
-        thumbstick = Vector2.zero;
 
-    }
-
-    void PopulateInventory()
-    {
-        sculptures = GetComponent<MenuManager>().Sculptures;
-        for (int i = 0; i < sculptures.Count; i++)
+        if (IsHolding() && GripIsPressed())
         {
-           //populate 
+            grabber.AttemptSnap();
+        }
+
+        if (IsHolding() && !TriggerIsPressed())
+        {
+            // constantly tries to drop
+            grabber.DropObject();
         }
     }
 
-    Vector3 z;
-    void RotateInventory(float inertiaApplied)
+
+    void InventoryCheck()
     {
-        z.z = inertiaApplied;
-        _Inventory.GetComponent<Rigidbody>().AddTorque(z);
+        if (!IsUsingInventory())
+        {
+            if (TriggerIsPressed() && ThumbstickIsPressed())
+                StartUsingInventory();
+        }
+
+        if (IsUsingInventory())
+        {
+            if (!TriggerIsPressed() || !ThumbstickIsPressed())
+            {
+                StopUsingInventory();
+            }
+            else
+            {
+                if (ThumbstickIsRight())
+                    inventory.ItemForward();
+                else if (ThumbstickIsLeft())
+                    inventory.ItemBackward();
+            }
+        }
+
+
+    }
+
+    void StartUsingInventory()
+    {
+        Debug.Log("Starting inventory interaction");
+        OVRPlayer.EnableLinearMovement = false;
+        interactingWithInventory = true;
+    }
+
+    void StopUsingInventory()
+    {
+        Debug.Log("Stopping inventory interaction");
+        OVRPlayer.EnableLinearMovement = true;
+        interactingWithInventory = false;
+    }
+
+    bool IsUsingInventory()
+    {
+        return interactingWithInventory;
+    }
+
+    bool TriggerIsPressed()
+    {
+        return (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, hand) > 0.8f);
+    }
+
+    bool GripIsPressed()
+    {
+        return (OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, hand) > 0.8f);
     }
     
-   // enum slot { One, Two, Three, Four, Five, Six};
+    bool ThumbstickIsPressed()
+    {
+        return (OVRInput.Get(OVRInput.Button.PrimaryThumbstick, hand));
+    }
+
+    bool ThumbstickIsRight()
+    {
+        return (OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, hand).x > 0.8);
+    }
+
+    bool ThumbstickIsLeft()
+    {
+        return (OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, hand).x < -0.8);
+    }
+
+    public GameObject HeldObject()
+    {
+        return grabber.HeldObject();
+    }
+
+    public bool IsHolding()
+    {
+        return grabber.IsHolding();
+    }
 }

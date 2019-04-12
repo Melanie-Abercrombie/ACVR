@@ -17,27 +17,8 @@ public class GrabberControls : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-
-        if (isHolding)
-        {
+        if (isHolding) {
             UpdateHeldObjectTransform();
-
-            if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, hand) < 0.8f)
-            {
-                Debug.Log("Trigger released");
-                DropObject();
-            }
-
-            if (OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, hand) > 0.8f)
-            {
-                Debug.Log("Grip pressed");
-                AttemptSnap();
-            }
-        }
-        else if (!isHolding && OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, hand) > 0.8f)
-        {
-            Debug.Log("Trigger down");
-            AttemptGrab();
         }
     }
 
@@ -53,14 +34,22 @@ public class GrabberControls : MonoBehaviour {
         currentYRotation = currentYRotation % 360;
         heldObject.transform.rotation = transform.rotation;
         heldObject.transform.Rotate(Vector3.up, currentYRotation);
+
+        if (heldObject.tag == "WallArt")
+        {
+            heldObject.transform.Rotate(Vector3.up, 90);
+        }
     }
 
-    void AttemptGrab()
+    public void AttemptGrab()
     {
+        if (isHolding)
+            return;
+
         RaycastHit[] hits;
 
         //Sphere of interaction around hand
-        hits = Physics.SphereCastAll(transform.position, grabRadius, transform.forward, 0f, 1 << LayerMask.NameToLayer("Artwork"));
+        hits = Physics.SphereCastAll(transform.position, 0.1f, transform.forward, Mathf.Infinity, 1 << LayerMask.NameToLayer("Artwork"));
 
         //Collided
         if (hits.Length > 0)
@@ -79,41 +68,45 @@ public class GrabberControls : MonoBehaviour {
 
             if (found)
             {
-                isHolding = true;
-                heldObject = hits[closestHit].transform.gameObject;
-                heldObject.transform.position = transform.position;
-                heldObject.layer = LayerMask.NameToLayer("HeldObject");
-                heldObject.GetComponent<Collider>().isTrigger = true;
-                foreach (Transform child in transform)
-                    child.gameObject.layer = LayerMask.NameToLayer("HeldObject");
-                Debug.Log("held the object named " + heldObject.ToString());
+                GameObject item = hits[closestHit].transform.gameObject;
+                GrabObject(item);
             }
         }
     }
 
-    void DropObject()
+    public void GrabObject(GameObject item)
     {
+        isHolding = true;
+        heldObject = item;
+        heldObject.transform.position = transform.position;
+        heldObject.layer = LayerMask.NameToLayer("HeldObject");
+        heldObject.GetComponent<Collider>().isTrigger = true;
+        foreach (Transform child in transform)
+            child.gameObject.layer = LayerMask.NameToLayer("HeldObject");
+        Debug.Log("held the object named " + heldObject.ToString());
+    }
+
+    public void DropObject()
+    {
+        if (!isHolding)
+            return;
+
         heldObject.layer = LayerMask.NameToLayer("Artwork");
         heldObject.GetComponent<Collider>().isTrigger = false;
         foreach (Transform child in transform)
             child.gameObject.layer = LayerMask.NameToLayer("Artwork");
         isHolding = false;
+        heldObject = null;
         currentYRotation = 0f;
     }
 
-    void AttemptSnap()
+    public void AttemptSnap()
     {
-        /*
-        Raycast in direction of controller
-        If nearest wall/floor hit is the appropriate wall/floor
-            Align object with surface RaycastHit.point
-            Should be easy for statues just match up with up
-            Should also be easy for paintings just align normal and match up with up
-        */
+        if (!isHolding)
+            return;
 
         Debug.Log("Attempting Snap");
         RaycastHit[] hits = Physics.RaycastAll(transform.position, transform.forward, Mathf.Infinity, 1 << LayerMask.NameToLayer("Environment"));
-
 
         int snapHitIndex = FindSnapHitIndex(hits);
         if (snapHitIndex == -1)
@@ -169,5 +162,15 @@ public class GrabberControls : MonoBehaviour {
         bool matchesFloor = surface.tag == "Floor" && artwork.tag == "FloorArt";
         bool matchesWall = surface.tag == "Wall" && artwork.tag == "WallArt";
         return (matchesFloor || matchesWall);
+    }
+
+    public GameObject HeldObject()
+    {
+        return heldObject;
+    }
+
+    public bool IsHolding()
+    {
+        return isHolding;
     }
 }
