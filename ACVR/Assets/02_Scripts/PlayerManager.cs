@@ -4,11 +4,11 @@ using UnityEngine;
 using System;
 
 public class PlayerManager : MonoBehaviour {
-    
+
     public OVRPlayerController OVRPlayer;
     public OVRInput.Controller hand;
     public GrabberControls grabber;
-    public InventoryManager inventory;
+    public PocketInventoryManager pocketInventory;
 
     private bool interactingWithInventory;
     private float slowUpdateInterval = 0.25f;
@@ -48,7 +48,6 @@ public class PlayerManager : MonoBehaviour {
         }
     }
 
-
     void InventoryCheck()
     {
         if (!IsUsingInventory())
@@ -66,26 +65,33 @@ public class PlayerManager : MonoBehaviour {
             else
             {
                 if (ThumbstickIsRight())
-                    inventory.ItemForward();
+                {
+                    pocketInventory.ItemForward();
+                    grabber.SetHeldObject(pocketInventory.GetCurrentInventoryObject());
+                }
                 else if (ThumbstickIsLeft())
-                    inventory.ItemBackward();
+                {
+                    pocketInventory.ItemBackward();
+                    grabber.SetHeldObject(pocketInventory.GetCurrentInventoryObject());
+                }
             }
         }
-
-
     }
 
     void StartUsingInventory()
     {
         Debug.Log("Starting inventory interaction");
         OVRPlayer.EnableLinearMovement = false;
+        OVRPlayer.EnableRotation = false;
         interactingWithInventory = true;
+        pocketInventory.SetCurrentToTarget(grabber.HeldObject());
     }
 
     void StopUsingInventory()
     {
         Debug.Log("Stopping inventory interaction");
         OVRPlayer.EnableLinearMovement = true;
+        OVRPlayer.EnableRotation = true;
         interactingWithInventory = false;
     }
 

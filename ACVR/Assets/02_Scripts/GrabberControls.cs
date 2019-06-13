@@ -76,12 +76,15 @@ public class GrabberControls : MonoBehaviour {
 
     public void GrabObject(GameObject item)
     {
+        while (item.transform.parent != null && (item.transform.parent.CompareTag("FloorArt") || item.transform.parent.CompareTag("WallArt")))
+            item = item.transform.parent.gameObject;
+
         isHolding = true;
         heldObject = item;
         heldObject.transform.position = transform.position;
         heldObject.layer = LayerMask.NameToLayer("HeldObject");
         heldObject.GetComponent<Collider>().isTrigger = true;
-        foreach (Transform child in transform)
+        foreach (Transform child in item.transform)
             child.gameObject.layer = LayerMask.NameToLayer("HeldObject");
         Debug.Log("held the object named " + heldObject.ToString());
     }
@@ -93,7 +96,7 @@ public class GrabberControls : MonoBehaviour {
 
         heldObject.layer = LayerMask.NameToLayer("Artwork");
         heldObject.GetComponent<Collider>().isTrigger = false;
-        foreach (Transform child in transform)
+        foreach (Transform child in heldObject.transform)
             child.gameObject.layer = LayerMask.NameToLayer("Artwork");
         isHolding = false;
         heldObject = null;
@@ -139,7 +142,6 @@ public class GrabberControls : MonoBehaviour {
 
     void Snap(RaycastHit targetHit, GameObject heldObject)
     {
-        Debug.Log("Snapping");
         if(heldObject.tag == "FloorArt")
         {
             float displacement = heldObject.transform.lossyScale.y / 2;
@@ -162,6 +164,15 @@ public class GrabberControls : MonoBehaviour {
         bool matchesFloor = surface.tag == "Floor" && artwork.tag == "FloorArt";
         bool matchesWall = surface.tag == "Wall" && artwork.tag == "WallArt";
         return (matchesFloor || matchesWall);
+    }
+
+    public void SetHeldObject(GameObject targetObject)
+    {
+        GameObject currentObject = heldObject;
+        DropObject();
+        Destroy(currentObject);
+        GameObject createdObject = Instantiate(targetObject, transform.position - new Vector3(0,10,0), Quaternion.identity);
+        GrabObject(createdObject);
     }
 
     public GameObject HeldObject()
